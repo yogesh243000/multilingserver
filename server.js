@@ -31,9 +31,10 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // MongoDB Connection
 const mongoUrl = process.env.MONGO_URL;
 mongoose
-  .connect(mongoUrl)
+  .connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Could not connect to MongoDB", err));
+
 // const renameFiles = async () => {
 //   try {
 //     const files = await FileDetails.find({});
