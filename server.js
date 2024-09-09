@@ -7,7 +7,7 @@ const path = require("path");
 const fs = require("fs");
 const clickupRoutes = require("./routes/clickup");
 
-const FileDetails = require("./fileDetails"); // Adjust this as necessary
+const FileDetails = require("./models/filedetails"); // Adjust this as necessary
 const app = express();
 
 // Middleware
