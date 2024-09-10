@@ -7,7 +7,9 @@ const path = require("path");
 const fs = require("fs");
 const clickupRoutes = require("./routes/clickup");
 
-const FileDetails = require("./models/filedetails"); // Adjust this as necessary
+const FileDetails = require("./models/filedetails"); // Model for files
+const Post = require("./models/post"); // Model for posts
+
 const app = express();
 
 // Middleware
@@ -29,48 +31,18 @@ app.use(
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // MongoDB Connection
-// MongoDB Connection
 const mongoUrl =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://12200835:Multilingapp12345@cluster0.ozezr.mongodb.net/";
+  process.env.MONGODB_URI || "mongodb://localhost:27017/mydatabase";
 mongoose
   .connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Could not connect to MongoDB", err));
 
-// const renameFiles = async () => {
-//   try {
-//     const files = await FileDetails.find({});
-//     files.forEach((fileDetail) => {
-//       if (fileDetail.files && fileDetail.originalFilenames) {
-//         fileDetail.files.forEach(async (timestampedFilename, index) => {
-//           const originalFilename = fileDetail.originalFilenames[index]; // Adjust according to your schema
-
-//           if (originalFilename) {
-//             const oldPath = path.join("uploads", timestampedFilename);
-//             const newPath = path.join("uploads", originalFilename);
-
-//             if (fs.existsSync(oldPath)) {
-//               fs.rename(oldPath, newPath, (err) => {
-//                 if (err) throw err;
-//                 console.log(`Renamed ${oldPath} to ${newPath}`);
-//               });
-//             }
-//           } else {
-//             console.error(`Original filename not found for index ${index}`);
-//           }
-//         });
-//       } else {
-//         console.error(
-//           "Files or originalFilenames array is missing or undefined."
-//         );
-//       }
-//     });
-//   } catch (error) {
-//     console.error("Error renaming files:", error);
-//   }
-// };
-// renameFiles();
+// Create uploads directory if it doesn't exist
+const dir = "./uploads";
+if (!fs.existsSync(dir)) {
+  fs.mkdirSync(dir);
+}
 
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
@@ -99,32 +71,7 @@ const upload = multer({
   },
 });
 
-// Create uploads directory if it doesn't exist
-const dir = "./uploads";
-if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir);
-}
-
 // Upload route
-// app.post("/upload", upload.array("files"), async (req, res) => {
-//   try {
-//     const { title, description } = req.body;
-//     const fileNames = req.files.map((file) => file.filename);
-//     const originalFileNames = req.files.map((file) => file.originalname);
-
-//     await FileDetails.create({
-//       title: title,
-//       description: description,
-//       files: fileNames,
-//       originalFilenames: originalFileNames, // Save original filenames
-//     });
-
-//     res.send({ status: "ok" });
-//   } catch (error) {
-//     console.error("Error saving file details:", error);
-//     res.status(500).json({ status: "error", message: error.message });
-//   }
-// });
 app.post("/upload", upload.array("files"), async (req, res) => {
   try {
     const { title, description } = req.body;
@@ -145,27 +92,10 @@ app.post("/upload", upload.array("files"), async (req, res) => {
   }
 });
 
-app.use((err, req, res, next) => {
-  if (err instanceof multer.MulterError) {
-    // Handle Multer-specific errors
-    return res.status(400).json({ status: "error", message: err.message });
-  }
-  next(err); // Pass to next error handler
-});
-if (process.env.NODE_ENV === "production") {
-  app.use((req, res, next) => {
-    if (req.header("x-forwarded-proto") !== "https") {
-      res.redirect(`https://${req.header("host")}${req.url}`);
-    } else {
-      next();
-    }
-  });
-}
-
-// Backend Route Debugging
+// Routes for file details
 app.get("/get-posts", async (req, res) => {
   try {
-    const posts = await FileDetails.find({}).sort({ createdAt: -1 }); // Sort by newest first
+    const posts = await FileDetails.find({}).sort({ createdAt: -1 });
     const postsWithFileUrls = posts.map((post) => ({
       ...post._doc,
       files: post.files.map(
@@ -181,9 +111,7 @@ app.get("/get-posts", async (req, res) => {
 
 app.get("/get-all-files", async (req, res) => {
   try {
-    console.log("Fetching all files"); // Debug log
     const data = await FileDetails.find({});
-    console.log("Files fetched:", data); // Debug log
     res.send({ status: "ok", data: data });
   } catch (error) {
     console.error("Error fetching all file details:", error);
@@ -230,7 +158,7 @@ app.put("/edit-file/:id", async (req, res) => {
   }
 });
 
-// Create a new blog post
+// Blog post routes
 app.post("/create-post", async (req, res) => {
   try {
     const { title, content } = req.body;
@@ -242,7 +170,6 @@ app.post("/create-post", async (req, res) => {
   }
 });
 
-// Update a blog post
 app.put("/update-post/:id", async (req, res) => {
   try {
     const updatedPost = await Post.findByIdAndUpdate(req.params.id, req.body, {
@@ -258,7 +185,6 @@ app.put("/update-post/:id", async (req, res) => {
   }
 });
 
-// Delete a blog post
 app.delete("/delete-post/:id", async (req, res) => {
   try {
     const result = await Post.findByIdAndDelete(req.params.id);
