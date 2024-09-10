@@ -128,14 +128,14 @@ if (!fs.existsSync(dir)) {
 app.post("/upload", upload.array("files"), async (req, res) => {
   try {
     const { title, description } = req.body;
-    const fileNames = req.files.map((file) => file.filename); // Store multer-generated filenames
-    const originalFileNames = req.files.map((file) => file.originalname); // Store original names for reference
+    const fileNames = req.files.map((file) => file.filename);
+    const originalFileNames = req.files.map((file) => file.originalname);
 
     await FileDetails.create({
       title: title,
       description: description,
-      files: fileNames, // Save the multer-generated filenames
-      originalFilenames: originalFileNames, // Optional: Save original names for display purposes
+      files: fileNames,
+      originalFilenames: originalFileNames,
     });
 
     res.send({ status: "ok" });
