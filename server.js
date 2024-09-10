@@ -152,15 +152,25 @@ app.use((err, req, res, next) => {
   }
   next(err); // Pass to next error handler
 });
+if (process.env.NODE_ENV === "production") {
+  app.use((req, res, next) => {
+    if (req.header("x-forwarded-proto") !== "https") {
+      res.redirect(`https://${req.header("host")}${req.url}`);
+    } else {
+      next();
+    }
+  });
+}
 
-// Get all blog posts from FileDetails
 // Backend Route Debugging
 app.get("/get-posts", async (req, res) => {
   try {
     const posts = await FileDetails.find({}).sort({ createdAt: -1 }); // Sort by newest first
     const postsWithFileUrls = posts.map((post) => ({
       ...post._doc,
-      files: post.files.map((file) => `http://localhost:5001/uploads/${file}`),
+      files: post.files.map(
+        (file) => `https://${req.headers.host}/uploads/${file}`
+      ),
     }));
     res.send({ status: "ok", posts: postsWithFileUrls });
   } catch (error) {
