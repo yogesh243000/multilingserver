@@ -32,7 +32,8 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // MongoDB Connection
 const mongoUrl =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/mydatabase";
+  process.env.MONGODB_URI ||
+  "mongodb://atlas-sql-66ddf36bb9cbc3620dc71688-ozezr.a.query.mongodb.net/test?ssl=true&authSource=admin";
 mongoose
   .connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("Connected to MongoDB"))
