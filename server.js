@@ -29,11 +29,12 @@ app.use(
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // MongoDB Connection
-// const mongoUrl = process.env.MONGO_URL;
+// MongoDB Connection
+const mongoUrl =
+  process.env.MONGODB_URI ||
+  "mongodb+srv://12200835:Multilingapp12345@cluster0.ozezr.mongodb.net/";
 mongoose
-  .connect(
-    "mongodb+srv://12200835:Multilingapp12345@cluster0.ozezr.mongodb.net/"
-  )
+  .connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Could not connect to MongoDB", err));
 
