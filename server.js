@@ -277,6 +277,7 @@ app.delete("/delete-post/:id", async (req, res) => {
 // Routes
 app.get("/", (req, res) => {
   res.send("Success");
+  console.log("Hi i can get", send);
 });
 app.use("/api/clickup", clickupRoutes);
 
