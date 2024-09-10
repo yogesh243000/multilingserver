@@ -8,7 +8,7 @@ const fs = require("fs");
 const clickupRoutes = require("./routes/clickup");
 
 const FileDetails = require("./models/filedetails"); // Model for files
-const Post = require("./models/post"); // Model for posts
+// const Post = require("./models/post"); // Model for posts
 
 const app = express();
 
