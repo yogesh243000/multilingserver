@@ -6,6 +6,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const clickupRoutes = require("./routes/clickup");
+const notificationRoutes = require("./routes/notifications");
 
 const FileDetails = require("./models/filedetails"); // Model for files
 // const Post = require("./models/post"); // Model for posts
@@ -198,6 +199,21 @@ app.delete("/delete-post/:id", async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ status: "error", message: error.message });
+  }
+});
+
+// Notifications routes
+app.get("/notifications", (req, res) => {
+  res.json(notifications);
+});
+
+app.post("/notifications", (req, res) => {
+  const { type, message } = req.body;
+  if (type && message) {
+    addNotification(type, message);
+    res.status(201).json({ message: "Notification created" });
+  } else {
+    res.status(400).json({ message: "Invalid request" });
   }
 });
 
